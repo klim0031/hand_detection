@@ -55,15 +55,7 @@ else:
     raise ValueError('The version of data augmentation is not valid!')
 
 ''' Detection Model '''
-## using MobileNet v1
-if args.version == 'ssd_new_mobilenet_FFA':
-    from models.ssd_new_mobilenet_FFA import build_ssd
-elif args.version == 'ssd_new_mobilenet':
-    from models.ssd_new_mobilenet import build_ssd
-elif args.version == 'ssd_mobilenet':
-    from models.ssd_mobilenet import build_ssd
-else:
-    raise ValueError('The version of model is not valid!')
+from models.ssd_resnet import build_ssd
 
 
 if args.cuda and torch.cuda.is_available():
@@ -189,7 +181,7 @@ def train():
     batch_iterator = None
     data_loader = data.DataLoader(dataset, batch_size, num_workers=args.num_workers,
                                   shuffle=True, collate_fn=detection_collate, pin_memory=True)
-    
+
     for iteration in range(args.start_iter, max_iter):
         if (not batch_iterator) or (iteration % epoch_size == 0):
             # create batch iterator
