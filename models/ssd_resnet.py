@@ -7,7 +7,7 @@ from data import v2
 import os
 
 from torch.hub import load_state_dict_from_url
-model_url = 'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
+model_url = 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -202,7 +202,7 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-def _resnet(arch, block, layers, pretrained, progress, **kwargs):
+def _resnet(block, layers, pretrained, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_url,
@@ -217,7 +217,7 @@ def resnet101(pretrained=False, progress=True, **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained, progress,
+    return _resnet(Bottleneck, [3, 4, 23, 3], pretrained, progress,
                    **kwargs)
 
 class SSD(nn.Module):
