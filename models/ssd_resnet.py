@@ -240,9 +240,9 @@ class SSD(nn.Module):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
-        self.cfg = (voc, custom)[num_classes == 2]
-        self.priorbox = PriorBox(self.cfg)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        self.priorbox = PriorBox(v2)
+        with torch.no_grad:
+            self.priors = self.priorbox.forward()
         self.size = size
 
         # SSD network
@@ -322,13 +322,13 @@ class SSD(nn.Module):
         if ext == '.pkl' or '.pth':
             print('Loading weights into state dict...')
             self.load_state_dict(torch.load(base_file,
-                                 map_location=lambda storage, loc: storage))
+                                 map_location=lambda storage, loc: storage.cuda()))
             print('Finished!')
         else:
             print('Sorry only .pth and .pkl files supported.')
 
 def resnet():
-    resnet = resnet34(pretrained=True)
+    resnet = resnet101(pretrained=True)
     layers = [
         resnet.conv1,
         resnet.bn1,
