@@ -220,7 +220,7 @@ def resnet101(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 class SSD(nn.Module):
-    def __init__(self, phase, size, base, extras, head, num_classes):
+    def __init__(self, phase, base, extras, head, num_classes):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
