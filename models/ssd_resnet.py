@@ -225,10 +225,9 @@ class SSD(nn.Module):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
-        self.cfg = (voc, custom)[num_classes == 2]
-        self.priorbox = PriorBox(self.cfg)
+        self.priorbox = PriorBox(v2)
         self.priors = Variable(self.priorbox.forward(), volatile=True)
-        self.size = size
+        self.size = 300
 
         # SSD network
         self.resnet = nn.ModuleList(base)
@@ -240,7 +239,7 @@ class SSD(nn.Module):
         self.conf = nn.ModuleList(head[1])
 
         if phase == 'test':
-            self.softmax = nn.Softmax(dim=-1)
+            self.softmax = nn.Softmax()
             self.detect = Detect(num_classes, 0, 200, 0.01, 0.45)
 
     def forward(self, x):
