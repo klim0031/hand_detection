@@ -205,7 +205,7 @@ class ResNet(nn.Module):
 def _resnet(block, layers, pretrained, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(resnet18_url, map_location=lambda storage, loc: storage.cuda())
+        state_dict = load_state_dict_from_url(model_url, map_location=lambda storage, loc: storage.cuda())
         model.load_state_dict(state_dict)
     return model
 
@@ -220,7 +220,7 @@ def resnet101(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 class SSD(nn.Module):
-    def __init__(self, phase, base, extras, head, num_classes):
+    def __init__(self, phase, num_classes):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
@@ -390,4 +390,4 @@ def build_ssd(phase, size=300, num_classes=21):
     base_, extras_, head_ = multibox(resnet(),
                                      add_extras(extras[str(size)], 512),
                                      mbox[str(size)], num_classes)
-    return SSD(phase, size_, base_, extras_, head_, num_classes)
+    return SSD(phase, num_classes)
