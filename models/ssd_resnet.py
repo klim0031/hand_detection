@@ -6,7 +6,7 @@ from layers import *
 from data import v2
 import os
 
-from torch.hub import load_state_dict_from_url
+from torch.utils.model_zoo import load_url as load_state_dict_from_url
 model_url = 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -205,8 +205,7 @@ class ResNet(nn.Module):
 def _resnet(block, layers, pretrained, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_url,
-                                              progress=progress)
+        state_dict = load_state_dict_from_url(resnet18_url, map_location=lambda storage, loc: storage.cuda())
         model.load_state_dict(state_dict)
     return model
 
