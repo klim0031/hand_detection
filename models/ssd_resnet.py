@@ -241,7 +241,7 @@ class SSD(nn.Module):
         self.phase = phase
         self.num_classes = num_classes
         self.priorbox = PriorBox(v2)
-        with torch.no_grad:
+        with torch.no_grad():
             self.priors = self.priorbox.forward()
         self.size = size
 
