@@ -97,13 +97,7 @@ if args.resume:
     print('Resuming training, loading {}...'.format(args.resume))
     ssd_net.load_weights(args.resume)
 else:
-    mobilenet_weights = torch.load(args.save_folder + args.basenet)
-    # remove unused weights in mobilenet_weights
-    mobilenet_weights.pop('classifier.weight')
-    mobilenet_weights.pop('classifier.bias')
-    # load weights
-    print('Loading base network...')
-    ssd_net.mobilenet.load_state_dict(mobilenet_weights)
+    pass
 
 if args.cuda:
     net = net.cuda()
@@ -126,11 +120,26 @@ if not args.resume:
     ssd_net.extras.apply(weights_init)
     ssd_net.loc.apply(weights_init)
     ssd_net.conf.apply(weights_init)
+    ssd_net.stre_3.apply(weights_init)
+    ssd_net.convT_1_3.apply(weights_init)
+    ssd_net.relu_3.apply(weights_init)
+    ssd_net.stre_5.apply(weights_init)
+    ssd_net.convT_3_5.apply(weights_init)
+    ssd_net.relu_5.apply(weights_init)
+    ssd_net.stre_10.apply(weights_init)
+    ssd_net.convT_5_10.apply(weights_init)
+    ssd_net.relu_10.apply(weights_init)
+    ssd_net.stre_19.apply(weights_init)
+    ssd_net.convT_10_19.apply(weights_init)
+    ssd_net.relu_19.apply(weights_init)
+    ssd_net.stre_38.apply(weights_init)
+    ssd_net.convT_19_38.apply(weights_init)
+    ssd_net.relu_38.apply(weights_init)
 
-    objlist = dir(ssd_net)
-    if 'toplayer' in objlist and 'latlayer' in objlist:
-        ssd_net.toplayer.apply(weights_init)
-        ssd_net.latlayer.apply(weights_init)
+    ssd_net.multiflow_o.apply(weights_init)
+    ssd_net.multiflow_d2.apply(weights_init)
+    ssd_net.multiflow_d4.apply(weights_init)
+    ssd_net.multiflow_concat.apply(weights_init)
 
 optimizer = optim.SGD(net.parameters(), lr=args.lr,
                       momentum=args.momentum, weight_decay=args.weight_decay)

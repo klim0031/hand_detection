@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 from layers import *
 from data import v2
 import os
@@ -219,14 +220,30 @@ def resnet101(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 class SSD(nn.Module):
-    def __init__(self, phase, num_classes):
+    """Single Shot Multibox Architecture
+    The network is composed of a base VGG network followed by the
+    added multibox conv layers.  Each multibox layer branches into
+        1) conv2d for class conf scores
+        2) conv2d for localization predictions
+        3) associated priorbox layer to produce default bounding
+           boxes specific to the layer's feature map size.
+    See: https://arxiv.org/pdf/1512.02325.pdf for more details.
+    Args:
+        phase: (string) Can be "test" or "train"
+        size: input image size
+        base: resnet layers for input, size of either 300 or 500
+        extras: extra layers that feed to multibox loc and conf layers
+        head: "multibox head" consists of loc and conf conv layers
+    """
+
+    def __init__(self, phase, size, base, extras, head, num_classes):
         super(SSD, self).__init__()
         self.phase = phase
         self.num_classes = num_classes
-        self.priorbox = PriorBox(v2)
-        with torch.no_grad():
-            self.priors = self.priorbox.forward()
-        self.size = 300
+        self.cfg = (voc, custom)[num_classes == 2]
+        self.priorbox = PriorBox(self.cfg)
+        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        self.size = size
 
         # SSD network
         self.resnet = nn.ModuleList(base)
@@ -238,7 +255,7 @@ class SSD(nn.Module):
         self.conf = nn.ModuleList(head[1])
 
         if phase == 'test':
-            self.softmax = nn.Softmax()
+            self.softmax = nn.Softmax(dim=-1)
             self.detect = Detect(num_classes, 0, 200, 0.01, 0.45)
 
     def forward(self, x):
@@ -305,13 +322,13 @@ class SSD(nn.Module):
         if ext == '.pkl' or '.pth':
             print('Loading weights into state dict...')
             self.load_state_dict(torch.load(base_file,
-                                 map_location=lambda storage, loc: storage.cuda()))
+                                 map_location=lambda storage, loc: storage))
             print('Finished!')
         else:
             print('Sorry only .pth and .pkl files supported.')
 
 def resnet():
-    resnet = resnet101(pretrained=True)
+    resnet = resnet34(pretrained=True)
     layers = [
         resnet.conv1,
         resnet.bn1,
@@ -390,4 +407,4 @@ def build_ssd(phase, size=300, num_classes=21):
     base_, extras_, head_ = multibox(resnet(),
                                      add_extras(extras[str(size)], 512),
                                      mbox[str(size)], num_classes)
-    return SSD(phase, num_classes)
+    return SSD(phase, size, base_, extras_, head_, num_classes)
