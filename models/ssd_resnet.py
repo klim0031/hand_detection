@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 from layers import *
 from data import v2
 import os
@@ -225,7 +224,8 @@ class SSD(nn.Module):
         self.phase = phase
         self.num_classes = num_classes
         self.priorbox = PriorBox(v2)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        with torch.no_grad():
+            self.priors = self.priorbox.forward()
         self.size = 300
 
         # SSD network
